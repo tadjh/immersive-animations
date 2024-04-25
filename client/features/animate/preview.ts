@@ -79,13 +79,13 @@ export function preview() {
 
   console.log(i, anims[i]);
 
-  SetPedAnim(animDict, anims[i], { animType: "single" });
+  SetPedAnim(animDict, anims[i], { type: "single" });
 
   loop = setInterval(() => {
     if (i === anims.length - 1) clearInterval(loop);
     i++;
     console.log(i, anims[i]);
-    SetPedAnim(animDict, anims[i], { animType: "single" });
+    SetPedAnim(animDict, anims[i], { type: "single" });
   }, 3000);
 
   //   SetPedAnim(animDict, "ped_a_enter_loop", { animType: "single" });

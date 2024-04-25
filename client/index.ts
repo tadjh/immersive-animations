@@ -2,6 +2,7 @@ import { myRandomData } from "./MyOther.client";
 import { COMMAND_EMOTE } from "./config";
 import { emotes } from "./config/emotes";
 import { preview } from "./features/animate/preview";
+import { extinguishTorch, lightTorch } from "./features/animate/props";
 import { print, getArg, isEmpty } from "./utils";
 import { SetPedAnim, StopPedAnim } from "./utils/natives";
 
@@ -33,15 +34,15 @@ export async function emote(_source: number, args: string[] | []) {
 
   if (!emotes.hasOwnProperty(arg)) return;
 
-  const { animDict, animName, ...options } = emotes[arg];
-
   try {
-    await SetPedAnim(animDict, animName, options);
+    await SetPedAnim(emotes[arg]);
   } catch (error) {
     print(error);
   }
 }
 
 RegisterCommand(COMMAND_EMOTE, emote, false);
+RegisterCommand("survival:torch:on", lightTorch, false);
+RegisterCommand("survival:torch:off", extinguishTorch, false);
 
 globalThis.exports("SetPedAnimDict", SetPedAnim);

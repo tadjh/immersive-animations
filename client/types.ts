@@ -12,33 +12,37 @@ export interface PropOptions {
   hasCollision?: boolean;
 }
 
-type animationTypes =
-  | {
-      animEnter: string;
-      animName: string;
-      animExit: string;
-      animType: "inAndOut";
-    }
-  | {
-      animName: string;
-      animType: "single";
-    };
-
-export type Options = {
-  animDict: string;
-  animFlag?: eAnimationFlags;
+export interface AnimationData {
+  name: string;
+  flag?: AnimationFlags;
   blendInSpeed?: number;
   blendOutSpeed?: number;
   duration?: number;
-  flag?: number;
   playbackRate?: number;
   lockX?: boolean;
   lockY?: boolean;
   lockZ?: boolean;
-  prop?: PropOptions;
-} & animationTypes;
+}
 
-export enum rotationOrders {
+type AnimationTypes =
+  | {
+      type: "inAndOut";
+      anim: {
+        enter: AnimationData;
+        idle: AnimationData;
+        exit: AnimationData;
+      };
+    }
+  | ({
+      type: "single";
+    } & AnimationData);
+
+export type AnimationOptions = {
+  dictionary: string;
+  prop?: PropOptions;
+} & AnimationTypes;
+
+export enum RotationOrders {
   ZYX,
   YZX,
   ZXY, // most commonly used
@@ -47,16 +51,42 @@ export enum rotationOrders {
   XYZ,
 }
 
-export enum eAnimationFlags {
-  ANIM_FLAG_NORMAL = 0,
-  ANIM_FLAG_REPEAT = 1,
-  ANIM_FLAG_STOP_LAST_FRAME = 2,
-  ANIM_FLAG_UPPERBODY = 16,
-  ANIM_FLAG_ENABLE_PLAYER_CONTROL = 32,
-  ANIM_FLAG_CANCELABLE = 120,
+export enum AnimationFlags {
+  AF_NORMAL = 0x00000000, // Default
+  AF_LOOPING = 0x00000001, // Keep repeating animation.
+  AF_HOLD_LAST_FRAME = 0x00000002, // Stop animation at the last animation frame.
+  AF_REPOSITION_WHEN_FINISHED = 0x00000004, // Matches the peds physical representation position with the visual representation position after the animation ended.
+  AF_NOT_INTERRUPTABLE = 0x00000008, // Animation can't be interrupted by external events.
+  AF_UPPERBODY = 0x00000010, // Only animate upper body of ped model.
+  AF_SECONDARY = 0x00000020, // Animation runs in the secondary task slot which enables the player to for example move.
+  AF_REORIENT_WHEN_FINISHED = 0x00000040, // Matches the peds physical representation direction with the visual representation direction after the animation ended.
+  AF_ABORT_ON_PED_MOVEMENT = 0x00000080, // Ends the animation as soon as the ped tries to move.
+  AF_ADDITIVE = 0x00000100, // Playback the animation additively. Only works with special animations.
+  AF_TURN_OFF_COLLISION = 0x00000200, // Disables collision direction while animation is playing.
+  AF_OVERRIDE_PHYSICS = 0x00000400, // Do not apply any physic forces while animation is playing. Also turns off collision.
+  AF_IGNORE_GRAVITY = 0x00000800, // Do not apply gravity while animation is playing.
+  AF_EXTRACT_INITIAL_OFFSET_FOR_SYNC = 0x00001000, // Extracts the initial offset of the playback position. To be used when playing synced animations on different peds.
+  AF_EXIT_AFTER_INTERRUPTED = 0x00002000, // Exits the animation after getting interrupted by a different task (e.g. Natural Motion).
+  AF_TAG_SYNC_IN = 0x00004000, // Sync the animation whilst blending in.
+  AF_TAG_SYNC_OUT = 0x00008000, // Sync the animation whilst blending out.
+  AF_SYNC_CONTINUOUS = 0x00010000, // Sync the animation all the time.
+  AF_FORCE_START = 0x00020000, // Force the animation to start even if the ped is falling, ragdolling, ...
+  AF_USE_KINEMATIC_PHYSICS = 0x00040000, // Use the kinematic physics mode on the entity for the duration of the animation.
+  AF_USE_MOVER_EXTRACTION = 0x00080000, // Updates the peds capsule position every frame based on the animation. Used with USE_KINEMATIC_PHYSICS.
+  AF_HIDE_WEAPON = 0x00100000, // Hides the weapon during animation.
+  AF_ENDS_IN_DEAD_POSE = 0x00200000, // Kills the ped after the animation finished.
+  AF_RAGDOLL_ON_COLLISION = 0x00400000, // If the peds ragdoll makes contact with anything physical active ragdoll and fall over.
+  AF_DONT_EXIT_ON_DEATH = 0x00800000, // Prevent Secondary Animation Task to end on death.
+  AF_ABORT_ON_WEAPON_DAMAGE = 0x01000000, // Also works if AF_NOT_INTERRUPTABLE is set.
+  AF_DISABLE_FORCED_PHYSICS_UPDATE = 0x02000000, // Prevent adjusting the capsule on the enter state of the animation.
+  AF_PROCESS_ATTACHMENTS_ON_START = 0x04000000, // Forces the attachments to be processed at the start of the animation.
+  AF_EXPAND_PED_CAPSULE_FROM_SKELETON = 0x08000000, // Expands the capsule to the extents of the skeleton.
+  AF_USE_ALTERNATIVE_FP_ANIM = 0x10000000, // Plays an alternative version of the animation if the player is in first person mode.
+  AF_BLENDOUT_WRT_LAST_FRAME = 0x20000000, // Starts blending out the animation earlier, so that blend out duration finishes with the animation.
+  AF_USE_FULL_BLENDING = 0x40000000, // Use full blending for this anim and override the heading/position adjustment.
 }
 
-export enum ePedBoneId {
+export enum PedBoneId {
   SKEL_ROOT = 0x0,
   SKEL_Pelvis = 0x2e28,
   SKEL_L_Thigh = 0xe39f,

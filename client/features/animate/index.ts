@@ -1,12 +1,12 @@
-import { DEFAULT_ANIM_DICT, DEFAULT_ANIM_EMOTE } from "../../config";
-import { Options, eAnimationFlags } from "../../types";
+import { DEFAULT_ANIMATION } from "../../config";
+import { AnimationOptions, AnimationFlags, AnimationData } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 import { ClearPedAnimProp, SetPedAnimProp } from "../../utils/natives";
 
 let lastDict = "";
 let lastAnim = "";
 let lastType = "";
-let exitAnim = "";
+let exitAnim: AnimationData = { name: "" };
 let propHandle = 0;
 
 export function handleStopAnimation() {
@@ -31,7 +31,7 @@ export function handleStopAnimation() {
 
           lastDict = "";
           lastAnim = "";
-          exitAnim = "";
+          exitAnim = { name: "" };
           propHandle = 0;
 
           return clearTick(tick);
@@ -40,26 +40,27 @@ export function handleStopAnimation() {
 
       break;
     case "inAndOut":
-      if (exitAnim) {
+      if (exitAnim.name) {
         ClearPedTasks(ped);
         TaskPlayAnim(
           ped,
           lastDict,
-          exitAnim,
-          1.0,
-          1.0,
-          -1,
-          eAnimationFlags.ANIM_FLAG_STOP_LAST_FRAME +
-            eAnimationFlags.ANIM_FLAG_UPPERBODY +
-            eAnimationFlags.ANIM_FLAG_ENABLE_PLAYER_CONTROL,
-          0.0,
-          false,
-          false,
-          false
+          exitAnim.name,
+          exitAnim.blendInSpeed || 1.0,
+          exitAnim.blendOutSpeed || 1.0,
+          exitAnim.duration || -1,
+          exitAnim.flag ||
+            AnimationFlags.AF_LOOPING +
+              AnimationFlags.AF_UPPERBODY +
+              AnimationFlags.AF_SECONDARY,
+          exitAnim.playbackRate || 0.0,
+          exitAnim.lockX || false,
+          exitAnim.lockY || false,
+          exitAnim.lockZ || false
         );
 
         const tick = setTick(() => {
-          if (GetEntityAnimCurrentTime(ped, lastDict, exitAnim) === 1) {
+          if (GetEntityAnimCurrentTime(ped, lastDict, exitAnim.name) === 1) {
             // StopAnimTask(PlayerPedId(), lastDict, exitAnim, 8.0);
             // ClearPedTasks(ped);
             ClearPedTasksImmediately(ped);
@@ -70,7 +71,7 @@ export function handleStopAnimation() {
 
             lastDict = "";
             lastAnim = "";
-            exitAnim = "";
+            exitAnim = { name: "" };
             propHandle = 0;
 
             return clearTick(tick);
@@ -79,117 +80,99 @@ export function handleStopAnimation() {
       }
       break;
     default:
+      if (propHandle) ClearPedAnimProp(propHandle);
       ClearPedTasksImmediately(ped);
       break;
   }
 }
 
-async function animate(
-  animDict: string,
-  animName: string,
-  options?: Partial<Options>
-) {
-  if (!options?.animType) return;
+async function animate(options: AnimationOptions) {
+  if (!options) return;
 
   const ped = PlayerPedId();
 
   ClearPedTasks(ped);
 
-  switch (options.animType) {
-    case "single":
-      TaskPlayAnim(
-        ped,
-        animDict,
-        animName,
-        8.0,
-        1.0,
-        -1,
-        options?.animFlag || eAnimationFlags.ANIM_FLAG_REPEAT,
-        0.0,
-        false,
-        false,
-        false
-      );
-      break;
+  switch (options.type) {
     case "inAndOut":
       lastType = "inAndOut";
-      lastDict = animDict;
-      exitAnim = options?.animExit || "";
+      lastDict = options.dictionary;
+      lastAnim = options.anim.enter.name;
+      exitAnim = options.anim.exit;
 
-      if (options?.animEnter) {
-        lastAnim = options.animEnter;
-        TaskPlayAnim(
-          ped,
-          animDict,
-          options.animEnter,
-          8.0,
-          0.0,
-          -1,
-          eAnimationFlags.ANIM_FLAG_STOP_LAST_FRAME +
-            eAnimationFlags.ANIM_FLAG_UPPERBODY,
-          0.0,
-          false,
-          false,
-          false
-        );
-
-        const tick = setTick(() => {
-          if (GetEntityAnimCurrentTime(ped, animDict, lastAnim) === 1) {
-            ClearPedTasks(ped);
-            lastAnim = animName;
-            TaskPlayAnim(
-              ped,
-              animDict,
-              animName,
-              8.0,
-              0.0,
-              -1,
-              eAnimationFlags.ANIM_FLAG_REPEAT +
-                eAnimationFlags.ANIM_FLAG_UPPERBODY +
-                eAnimationFlags.ANIM_FLAG_ENABLE_PLAYER_CONTROL,
-              0.0,
-              false,
-              false,
-              false
-            );
-
-            return clearTick(tick);
-          }
-        });
-      }
-      break;
-    default:
       TaskPlayAnim(
         ped,
-        animDict,
-        animName,
-        8.0,
-        8.0,
-        -1,
-        options?.animFlag || eAnimationFlags.ANIM_FLAG_REPEAT,
-        0.0,
-        false,
-        false,
-        false
+        options.dictionary,
+        options.anim.enter.name,
+        options.anim.enter.blendInSpeed || 8.0,
+        options.anim.enter.blendOutSpeed || 0.0,
+        options.anim.enter.duration || -1,
+        options.anim.enter.flag ||
+          AnimationFlags.AF_HOLD_LAST_FRAME + AnimationFlags.AF_UPPERBODY,
+        options.anim.enter.playbackRate || 0.0,
+        options.anim.enter.lockX || false,
+        options.anim.enter.lockY || false,
+        options.anim.enter.lockZ || false
       );
+
+      const tick = setTick(() => {
+        if (GetEntityAnimCurrentTime(ped, options.dictionary, lastAnim) === 1) {
+          ClearPedTasks(ped);
+          lastAnim = options.anim.idle.name;
+          TaskPlayAnim(
+            ped,
+            options.dictionary,
+            options.anim.idle.name,
+            options.anim.idle.blendInSpeed || 8.0,
+            options.anim.idle.blendOutSpeed || 0.0,
+            options.anim.idle.duration || -1,
+            options.anim.idle.flag ||
+              AnimationFlags.AF_LOOPING +
+                AnimationFlags.AF_UPPERBODY +
+                AnimationFlags.AF_SECONDARY,
+            options.anim.idle.playbackRate || 0.0,
+            options.anim.idle.lockX || false,
+            options.anim.idle.lockY || false,
+            options.anim.idle.lockZ || false
+          );
+
+          return clearTick(tick);
+        }
+      });
+      break;
+    case "single":
+      lastType = "single";
+      lastDict = options.dictionary;
+      lastAnim = options.name;
+      TaskPlayAnim(
+        ped,
+        options.dictionary,
+        options.name,
+        options.blendInSpeed || 8.0,
+        options.blendOutSpeed || 1.0,
+        options.duration || -1,
+        options?.flag || AnimationFlags.AF_LOOPING,
+        options.playbackRate || 0.0,
+        options.lockX || false,
+        options.lockY || false,
+        options.lockZ || false
+      );
+      break;
+    default:
       break;
   }
 
-  if (options?.prop) {
+  if (options.prop) {
     propHandle = await SetPedAnimProp(options.prop.model, options.prop);
   }
 }
 
-function handleAnimate(
-  animDict: string,
-  animName: string,
-  options?: Partial<Options>
-) {
+function handleAnimate(options: AnimationOptions) {
   return new Promise<void>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(() => {
-      if (HasAnimDictLoaded(animDict)) {
-        resolve(animate(animDict, animName, options));
+      if (HasAnimDictLoaded(options.dictionary)) {
+        resolve(animate(options));
         return clearTick(tick);
       }
       const elapsedTime = Date.now() - startTime;
@@ -205,17 +188,13 @@ function shouldRequestAnimDict(animDict: string) {
   return DoesAnimDictExist(animDict);
 }
 
-export function handleStartAnimation(
-  animDict: string,
-  animName: string,
-  options?: Partial<Options>
-) {
-  if (!shouldRequestAnimDict(animDict))
-    return console.log("Animation dictionary %s not found", animDict);
-  RequestAnimDict(animDict);
-  return handleAnimate(animDict, animName, options);
+export function handleStartAnimation(options: AnimationOptions) {
+  if (!shouldRequestAnimDict(options.dictionary))
+    return console.log("Animation dictionary %s not found", options.dictionary);
+  RequestAnimDict(options.dictionary);
+  return handleAnimate(options);
 }
 
 export function handleDefaultAnimation() {
-  return handleStartAnimation(DEFAULT_ANIM_DICT, DEFAULT_ANIM_EMOTE, {});
+  return handleStartAnimation(DEFAULT_ANIMATION);
 }

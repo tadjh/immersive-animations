@@ -1,57 +1,59 @@
-import { Options, eAnimationFlags, ePedBoneId } from "../types";
+import { AnimationOptions, AnimationFlags, PedBoneId } from "../types";
 
-export const emotes: { [key: string]: Options } = {
+export const emotes: { [key: string]: AnimationOptions } = {
   bird: {
-    animDict: "anim@mp_player_intselfiethe_bird",
-    animEnter: "enter",
-    animName: "idle_a",
-    animExit: "exit",
-    animType: "inAndOut",
+    dictionary: "anim@mp_player_intselfiethe_bird",
+    anim: {
+      enter: { name: "enter" },
+      idle: { name: "idle_a" },
+      exit: { name: "exit" },
+    },
+    type: "inAndOut",
     prop: {
       model: "prop_player_phone_01",
-      bone: ePedBoneId.SKEL_R_Hand,
+      bone: PedBoneId.SKEL_R_Hand,
       hasCollision: false,
       pos: [0.0, 0.0, 0.0],
       rot: [0.0, 0.0, 0.0],
     },
   },
   torch: {
-    animDict: "anim@heists@humane_labs@finale@keycards",
-    animName: "ped_b_enter_loop",
-    animType: "single",
-    animFlag:
-      eAnimationFlags.ANIM_FLAG_REPEAT +
-      eAnimationFlags.ANIM_FLAG_UPPERBODY +
-      eAnimationFlags.ANIM_FLAG_ENABLE_PLAYER_CONTROL,
+    dictionary: "anim@heists@humane_labs@finale@keycards",
+    name: "ped_b_enter_loop",
+    type: "single",
+    flag:
+      AnimationFlags.AF_LOOPING +
+      AnimationFlags.AF_UPPERBODY +
+      AnimationFlags.AF_SECONDARY,
     prop: {
-      model: "prop_tool_shovel3",
-      bone: ePedBoneId.SKEL_R_Hand,
-      pos: [0.2, 0.5, 0.1],
-      rot: [110.0, -10.0, 0.0],
+      model: "survival_torch",
+      bone: PedBoneId.PH_R_Hand,
+      pos: [-0.27, 1.05, 0.59],
+      rot: [120.0, 10.0, 0.0], // [chest, planar, ]
     },
   },
   rake: {
-    animDict: "anim@amb@drug_field_workers@rake@male_a@base",
-    animName: "base",
-    animType: "single",
+    dictionary: "anim@amb@drug_field_workers@rake@male_a@base",
+    name: "base",
+    type: "single",
     prop: {
       model: "prop_tool_rake",
-      bone: ePedBoneId.PH_R_Hand,
+      bone: PedBoneId.PH_R_Hand,
       pos: [0.0, 0.0, -0.03],
       rot: [0.0, 0.0, 0.0],
     },
   },
   sweep: {
-    animDict: "anim@amb@drug_field_workers@rake@male_a@base",
-    animName: "base",
-    animType: "single",
-    animFlag:
-      eAnimationFlags.ANIM_FLAG_REPEAT +
-      eAnimationFlags.ANIM_FLAG_UPPERBODY +
-      eAnimationFlags.ANIM_FLAG_ENABLE_PLAYER_CONTROL,
+    dictionary: "anim@amb@drug_field_workers@rake@male_a@base",
+    name: "base",
+    type: "single",
+    flag:
+      AnimationFlags.AF_LOOPING +
+      AnimationFlags.AF_UPPERBODY +
+      AnimationFlags.AF_SECONDARY,
     prop: {
       model: "prop_tool_broom",
-      bone: ePedBoneId.PH_R_Hand,
+      bone: PedBoneId.PH_R_Hand,
       pos: [-0.01, 0.04, -0.03],
       rot: [0.0, 0.0, 0.0],
     },
