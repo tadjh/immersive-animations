@@ -1,5 +1,4 @@
-import { Args, Model } from "../types";
-export * from "./debug";
+import { Args } from "../types";
 
 export function isEmpty<T extends unknown>(arr: T[] | []): arr is [] {
   return Array.isArray(arr) && !arr.length;

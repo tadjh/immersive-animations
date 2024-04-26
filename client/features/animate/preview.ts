@@ -5,7 +5,7 @@ let tick = 0;
 let loop: string | number | NodeJS.Timeout | undefined = 0;
 
 export function preview() {
-  const animDict = "anim@heists@humane_labs@finale@keycards";
+  const dictionary = "anim@heists@humane_labs@finale@keycards";
   const anims = [
     "ped_b_pass",
     "ped_a_enter_keycard",
@@ -79,13 +79,13 @@ export function preview() {
 
   console.log(i, anims[i]);
 
-  SetPedAnim(animDict, anims[i], { type: "single" });
+  SetPedAnim({ dictionary, name: anims[i], type: "single" });
 
   loop = setInterval(() => {
     if (i === anims.length - 1) clearInterval(loop);
     i++;
     console.log(i, anims[i]);
-    SetPedAnim(animDict, anims[i], { type: "single" });
+    SetPedAnim({ dictionary, name: anims[i], type: "single" });
   }, 3000);
 
   //   SetPedAnim(animDict, "ped_a_enter_loop", { animType: "single" });

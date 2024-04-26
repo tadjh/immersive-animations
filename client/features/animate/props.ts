@@ -2,42 +2,10 @@ import { DEFAULT_ANIM_PROP } from "../../config";
 import { Model, PropOptions, PedBoneId, RotationOrders } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 
-let propHandle = 0;
-let particleFx = 0;
+export let propHandle = 0;
 let curPos: [number, number, number] = [1.0, 1.0, 1.0];
 let curRot: [number, number, number] = [0.0, 0.0, 0.0];
 let isEditing = false;
-
-export function extinguishTorch() {
-  // StopEntityFire
-  if (particleFx) {
-    StopParticleFxLooped(particleFx, false);
-    console.log(`Stopping particle fx ${particleFx}`);
-  } else {
-    console.log(`Removing particle fx from entity ${propHandle}`);
-    RemoveParticleFxFromEntity(propHandle);
-  }
-}
-
-export function lightTorch() {
-  console.log(`Spawning torch fire onto prop with id ${propHandle}`);
-
-  // TODO not working
-  particleFx = StartParticleFxLoopedOnEntity(
-    "amb_torch_fire",
-    propHandle,
-    0.0,
-    0.0,
-    2.0,
-    0.0,
-    0.0,
-    0.0,
-    1.0,
-    false,
-    false,
-    false
-  );
-}
 
 function cleanUp(model: Model) {
   // SetModelAsNoLongerNeeded(model);
@@ -189,7 +157,7 @@ function spawn(model: Model, options?: Partial<PropOptions>) {
   return propHandle;
 }
 
-function handleSpawn(model: Model, options?: Partial<PropOptions>) {
+function handleProp(model: Model, options?: Partial<PropOptions>) {
   return new Promise<number>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(() => {
@@ -199,7 +167,7 @@ function handleSpawn(model: Model, options?: Partial<PropOptions>) {
       }
       const elapsedTime = Date.now() - startTime;
       if (shouldThreadExpire(elapsedTime)) {
-        reject(`Max execution time elapsed in handleSpawn`);
+        reject(`Max execution time elapsed in handleProp`);
         return clearTick(tick);
       }
     });
@@ -219,14 +187,12 @@ export function handleAttachProp(model: Model, options?: Partial<PropOptions>) {
   if (!IsModelInCdimage(model))
     throw new Error(`Prop model ${model} not found`);
   RequestModel(model);
-  return handleSpawn(model, options);
+  return handleProp(model, options);
 }
 
 export function handleRemoveProp(propHandle: number) {
   console.log(`Deleting prop with id ${propHandle}`);
   if (!DoesEntityExist(propHandle)) return;
-  // SetEntityAsMissionEntity(propHandle, true, true);
   DetachEntity(propHandle, false, false);
-  // DeleteObject(propHandle);
   DeleteEntity(propHandle);
 }

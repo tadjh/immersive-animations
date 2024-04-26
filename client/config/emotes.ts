@@ -26,6 +26,21 @@ export const emotes: { [key: string]: AnimationOptions } = {
       AnimationFlags.AF_UPPERBODY +
       AnimationFlags.AF_SECONDARY,
     prop: {
+      model: "survival_torch2",
+      bone: PedBoneId.PH_R_Hand,
+      pos: [-0.27, 1.05, 0.59],
+      rot: [120.0, 10.0, 0.0], // [chest, planar, ]
+    },
+  },
+  torch2: {
+    dictionary: "anim@heists@humane_labs@finale@keycards",
+    name: "ped_b_enter_loop",
+    type: "single",
+    flag:
+      AnimationFlags.AF_LOOPING +
+      AnimationFlags.AF_UPPERBODY +
+      AnimationFlags.AF_SECONDARY,
+    prop: {
       model: "survival_torch",
       bone: PedBoneId.PH_R_Hand,
       pos: [-0.27, 1.05, 0.59],

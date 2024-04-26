@@ -16,6 +16,8 @@ export function handleStopAnimation() {
     case "single":
       StopAnimTask(PlayerPedId(), lastDict, lastAnim, 1.0);
 
+      if (propHandle) ClearPedAnimProp(propHandle);
+
       const startTime = Date.now();
       const tick = setTick(() => {
         const elapsedTime = Date.now() - startTime;
@@ -26,8 +28,6 @@ export function handleStopAnimation() {
           ClearPedTasksImmediately(ped);
           // ClearPedSecondaryTask(ped);
           RemoveAnimDict(lastDict);
-
-          if (propHandle) ClearPedAnimProp(propHandle);
 
           lastDict = "";
           lastAnim = "";
@@ -59,6 +59,8 @@ export function handleStopAnimation() {
           exitAnim.lockZ || false
         );
 
+        if (propHandle) ClearPedAnimProp(propHandle);
+
         const tick = setTick(() => {
           if (GetEntityAnimCurrentTime(ped, lastDict, exitAnim.name) === 1) {
             // StopAnimTask(PlayerPedId(), lastDict, exitAnim, 8.0);
@@ -66,8 +68,6 @@ export function handleStopAnimation() {
             ClearPedTasksImmediately(ped);
             // ClearPedSecondaryTask(ped);
             RemoveAnimDict(lastDict);
-
-            if (propHandle) ClearPedAnimProp(propHandle);
 
             lastDict = "";
             lastAnim = "";
@@ -177,7 +177,7 @@ function handleAnimate(options: AnimationOptions) {
       }
       const elapsedTime = Date.now() - startTime;
       if (shouldThreadExpire(elapsedTime)) {
-        reject(`Max execution time elapsed in handleSpawn`);
+        reject(`Max execution time elapsed in handleAnimate`);
         return clearTick(tick);
       }
     });

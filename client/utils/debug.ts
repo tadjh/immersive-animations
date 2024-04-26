@@ -48,7 +48,7 @@ export function debug(_source: number, args: Args | []) {
  * A simple debug print function that is dependent on a convar
  * will output a nice prettfied message if debug is on
  */
-export function print(...data: any[]) {
+export function debugPrint(...data: any[]) {
   if (!shouldDebug()) return;
   labeledLog(...data);
 }
