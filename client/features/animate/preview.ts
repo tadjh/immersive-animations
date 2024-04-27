@@ -1,4 +1,4 @@
-import { SetPedAnim } from "../../utils/natives";
+import { startAnim } from ".";
 
 let active = false;
 let tick = 0;
@@ -79,13 +79,13 @@ export function preview() {
 
   console.log(i, anims[i]);
 
-  SetPedAnim({ dictionary, name: anims[i], type: "single" });
+  startAnim({ dictionary, name: anims[i], type: "single" });
 
   loop = setInterval(() => {
     if (i === anims.length - 1) clearInterval(loop);
     i++;
     console.log(i, anims[i]);
-    SetPedAnim({ dictionary, name: anims[i], type: "single" });
+    startAnim({ dictionary, name: anims[i], type: "single" });
   }, 3000);
 
   //   SetPedAnim(animDict, "ped_a_enter_loop", { animType: "single" });

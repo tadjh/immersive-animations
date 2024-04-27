@@ -2,14 +2,29 @@ export type Args = string[];
 
 export type Model = string | number;
 
-type Vector3Tuple = [number, number, number];
+export type Vector3 = { x: number; y: number; z: number };
+
+export interface AnimationHandles {
+  prop: number;
+  particle: number;
+}
+
+export interface ParticleOptions {
+  asset: string;
+  particle: string;
+  offset: { x: number; y: number; z: number };
+  rotation: { x: number; y: number; z: number };
+  scale: number;
+  lock: { x: boolean; y: boolean; z: boolean };
+}
 
 export interface PropOptions {
   model: Model;
   bone: number;
-  pos?: Vector3Tuple;
-  rot?: Vector3Tuple;
+  pos: Vector3;
+  rot: Vector3;
   hasCollision?: boolean;
+  particle?: ParticleOptions;
 }
 
 export interface AnimationData {
@@ -19,9 +34,7 @@ export interface AnimationData {
   blendOutSpeed?: number;
   duration?: number;
   playbackRate?: number;
-  lockX?: boolean;
-  lockY?: boolean;
-  lockZ?: boolean;
+  lock?: { x: boolean; y: boolean; z: boolean };
 }
 
 type AnimationTypes =

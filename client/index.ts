@@ -1,22 +1,14 @@
-import { myRandomData } from "./MyOther.client";
 import { COMMAND_EMOTE } from "./config";
 import { emotes } from "./config/emotes";
-import {
-  handleParticleOff,
-  handleParticleOn,
-} from "./features/animate/particle";
+import { detachPtfx, attachPtfx } from "./features/particle";
 import { preview } from "./features/animate/preview";
-import { propHandle } from "./features/animate/props";
 import { getArg, isEmpty } from "./utils";
 import { debugPrint } from "./utils/debug";
-import { SetPedAnim, StopPedAnim } from "./utils/natives";
+import { startAnim, stopAnim } from "./features/animate";
+import { AnimationHandles, AnimationOptions } from "./types";
+import { attachProp, detachProp } from "./features/prop";
 
-on("onResourceStart", (resName: string) => {
-  if (resName === GetCurrentResourceName()) {
-    console.log(myRandomData);
-    console.log("Immersive Animations started!");
-  }
-});
+let handles: AnimationHandles = { prop: 0, particle: 0 };
 
 /**
  * Sets ped model based on args
@@ -30,17 +22,17 @@ export async function emote(_source: number, args: string[] | []) {
   const arg = getArg(args);
 
   if (arg === "c") {
-    return StopPedAnim();
+    return (handles = stopAnim(handles));
   }
 
   if (arg === "p") {
     return preview();
   }
 
-  if (!emotes.hasOwnProperty(arg)) return;
-
   try {
-    await SetPedAnim(emotes[arg]);
+    if (emotes.has(arg)) {
+      handles = await startAnim(emotes.get(arg)!);
+    }
   } catch (error) {
     debugPrint(error);
   }
@@ -48,39 +40,18 @@ export async function emote(_source: number, args: string[] | []) {
 
 RegisterCommand(COMMAND_EMOTE, emote, false);
 
-RegisterCommand(
-  "survival:torch:on",
-  () => {
-    handleParticleOn("core", {
-      particle: "ent_amb_torch_fire",
-      propHandle,
-      offset: { x: 0.0, y: 0.0, z: 2.0 },
-      rotation: { x: 0.0, y: 0.0, z: 0.0 },
-      scale: 1.0,
-      lock: { x: false, y: false, z: false },
-    });
-  },
-  false
-);
-RegisterCommand(
-  "survival:torch:off",
-  () => handleParticleOff(propHandle),
-  false
-);
-
-setTick(() => {
-  if (IsControlJustPressed(0, 174)) {
-    handleParticleOn("core", {
-      particle: "ent_amb_torch_fire",
-      propHandle,
-      offset: { x: 0.0, y: 0.0, z: 2.0 },
-      rotation: { x: 0.0, y: 0.0, z: 0.0 },
-      scale: 1.0,
-      lock: { x: false, y: false, z: false },
-    });
-  } else if (IsControlJustPressed(0, 175)) {
-    handleParticleOff(propHandle);
-  }
+globalThis.exports("startAnim", startAnim);
+globalThis.exports("stopAnim", stopAnim);
+globalThis.exports("attachProp", attachProp);
+globalThis.exports("detachProp", detachProp);
+globalThis.exports("attachParticle", attachPtfx);
+globalThis.exports("detachParticle", detachPtfx);
+globalThis.exports("getHandles", () => handles);
+globalThis.exports("setHandles", (nextHandles: AnimationHandles) => {
+  handles = nextHandles;
 });
-
-globalThis.exports("SetPedAnimDict", SetPedAnim);
+globalThis.exports("getEmotes", () => emotes);
+globalThis.exports("hasEmote", (key: string) => emotes.has(key));
+globalThis.exports("addEmote", (key: string, value: AnimationOptions) =>
+  emotes.set(key, value)
+);
