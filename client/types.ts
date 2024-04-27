@@ -4,12 +4,12 @@ export type Model = string | number;
 
 export type Vector3 = { x: number; y: number; z: number };
 
-export interface AnimationHandles {
+export interface AnimHandles {
   prop: number;
   particle: number;
 }
 
-export interface ParticleOptions {
+export interface PtfxOptions {
   asset: string;
   particle: string;
   offset: { x: number; y: number; z: number };
@@ -24,12 +24,12 @@ export interface PropOptions {
   pos: Vector3;
   rot: Vector3;
   hasCollision?: boolean;
-  particle?: ParticleOptions;
+  particle?: PtfxOptions;
 }
 
-export interface AnimationData {
+export interface AnimData {
   name: string;
-  flag?: AnimationFlags;
+  flag?: AnimFlags;
   blendInSpeed?: number;
   blendOutSpeed?: number;
   duration?: number;
@@ -37,23 +37,23 @@ export interface AnimationData {
   lock?: { x: boolean; y: boolean; z: boolean };
 }
 
-type AnimationTypes =
+type AnimTypes =
   | {
       type: "inAndOut";
       anim: {
-        enter: AnimationData;
-        idle: AnimationData;
-        exit: AnimationData;
+        enter: AnimData;
+        idle: AnimData;
+        exit: AnimData;
       };
     }
   | ({
       type: "single";
-    } & AnimationData);
+    } & AnimData);
 
-export type AnimationOptions = {
+export type AnimOptions = {
   dictionary: string;
   prop?: PropOptions;
-} & AnimationTypes;
+} & AnimTypes;
 
 export enum RotationOrders {
   ZYX,
@@ -64,7 +64,7 @@ export enum RotationOrders {
   XYZ,
 }
 
-export enum AnimationFlags {
+export enum AnimFlags {
   AF_NORMAL = 0x00000000, // Default
   AF_LOOPING = 0x00000001, // Keep repeating animation.
   AF_HOLD_LAST_FRAME = 0x00000002, // Stop animation at the last animation frame.

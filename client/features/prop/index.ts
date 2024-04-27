@@ -4,7 +4,7 @@ import {
   PedBoneId,
   RotationOrders,
   Vector3,
-  AnimationHandles,
+  AnimHandles,
 } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 import { debugPrint } from "../../utils/debug";
@@ -80,7 +80,7 @@ export function attachProp(options: PropOptions) {
 
   RequestModel(options.model);
 
-  return new Promise<AnimationHandles>(function (resolve, reject) {
+  return new Promise<AnimHandles>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(async () => {
       if (HasModelLoaded(options.model)) {
@@ -96,14 +96,17 @@ export function attachProp(options: PropOptions) {
   });
 }
 
-export function detachProp(handles: AnimationHandles) {
-  if (!DoesEntityExist(handles.prop)) return;
-  debugPrint(`Deleting prop with id ${handles.prop}`);
+export function detachProp(handles: AnimHandles) {
+  if (DoesEntityExist(handles.prop)) {
+    debugPrint(`Deleting prop with id ${handles.prop}`);
 
-  if (handles.particle) {
-    detachPtfx(handles);
+    if (handles.particle) {
+      detachPtfx(handles);
+    }
+
+    DetachEntity(handles.prop, false, false);
+    DeleteEntity(handles.prop);
   }
 
-  DetachEntity(handles.prop, false, false);
-  DeleteEntity(handles.prop);
+  return { prop: 0, particle: 0 };
 }

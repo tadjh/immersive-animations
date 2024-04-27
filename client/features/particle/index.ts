@@ -1,14 +1,16 @@
-import { AnimationHandles, ParticleOptions } from "../../types";
+import { AnimHandles, PtfxOptions } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 import { debugPrint } from "../../utils/debug";
 
-export function detachPtfx(handles: AnimationHandles) {
+export function detachPtfx(handles: AnimHandles) {
+  debugPrint(`Deleting particle ${handles.particle} from prop ${handles.prop}`);
+  debugPrint(
+    "DoesParticleFxLoopedExist",
+    DoesParticleFxLoopedExist(handles.particle)
+  );
   if (DoesParticleFxLoopedExist(handles.particle)) {
     RemoveParticleFxFromEntity(handles.prop);
     StopParticleFxLooped(handles.particle, false);
-    debugPrint(
-      `Deleting particle ${handles.particle} from prop ${handles.prop}`
-    );
   }
 
   // if (handles.prop === 0 || handles.prop === 1) {
@@ -18,7 +20,7 @@ export function detachPtfx(handles: AnimationHandles) {
   return { prop: handles.prop, particle: 0 };
 }
 
-function spawn(propHandle: number, options: ParticleOptions) {
+function spawn(propHandle: number, options: PtfxOptions) {
   // const isNonLooped = false; // TODO support looped particles
 
   // if (isNonLooped) {
@@ -67,18 +69,18 @@ function spawn(propHandle: number, options: ParticleOptions) {
     options.lock.y,
     options.lock.z
   );
-  console.log(
+  debugPrint(
     `Looped Particle spawning with handle ${particleHandle} with propHandle ${propHandle}`
   );
   return { prop: propHandle, particle: particleHandle };
 }
 
-export function attachPtfx(propHandle: number, options: ParticleOptions) {
+export function attachPtfx(propHandle: number, options: PtfxOptions) {
   debugPrint(`Spawning particle onto prop with id ${propHandle}`);
 
   RequestNamedPtfxAsset(options.asset);
 
-  return new Promise<AnimationHandles>(function (resolve, reject) {
+  return new Promise<AnimHandles>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(() => {
       if (HasNamedPtfxAssetLoaded(options.asset)) {

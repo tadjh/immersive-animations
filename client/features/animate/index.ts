@@ -1,9 +1,4 @@
-import {
-  AnimationOptions,
-  AnimationFlags,
-  AnimationData,
-  AnimationHandles,
-} from "../../types";
+import { AnimOptions, AnimFlags, AnimData, AnimHandles } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 import { debugPrint } from "../../utils/debug";
 import { attachProp, detachProp } from "../prop";
@@ -11,7 +6,7 @@ import { attachProp, detachProp } from "../prop";
 let lastDict = "";
 let lastAnim = "";
 let lastType = "";
-let exitAnim: AnimationData = { name: "" };
+let exitAnim: AnimData = { name: "" };
 
 function cleanUp() {
   ClearPedTasksImmediately(PlayerPedId());
@@ -23,7 +18,7 @@ function cleanUp() {
   exitAnim = { name: "" };
 }
 
-export function stopAnim(handles: AnimationHandles): AnimationHandles {
+export function stopAnim(handles: AnimHandles): AnimHandles {
   const ped = PlayerPedId();
 
   switch (lastType) {
@@ -54,9 +49,9 @@ export function stopAnim(handles: AnimationHandles): AnimationHandles {
           exitAnim.blendOutSpeed || 1.0,
           exitAnim.duration || -1,
           exitAnim.flag ||
-            AnimationFlags.AF_LOOPING +
-              AnimationFlags.AF_UPPERBODY +
-              AnimationFlags.AF_SECONDARY,
+            AnimFlags.AF_LOOPING +
+              AnimFlags.AF_UPPERBODY +
+              AnimFlags.AF_SECONDARY,
           exitAnim.playbackRate || 0.0,
           exitAnim.lock?.x || false,
           exitAnim.lock?.y || false,
@@ -85,7 +80,7 @@ export function stopAnim(handles: AnimationHandles): AnimationHandles {
   };
 }
 
-async function animate(options: AnimationOptions) {
+async function animate(options: AnimOptions) {
   const ped = PlayerPedId();
 
   // Reset animation blending before starting a new animation.
@@ -106,7 +101,7 @@ async function animate(options: AnimationOptions) {
         options.anim.enter.blendOutSpeed || 0.0,
         options.anim.enter.duration || -1,
         options.anim.enter.flag ||
-          AnimationFlags.AF_HOLD_LAST_FRAME + AnimationFlags.AF_UPPERBODY,
+          AnimFlags.AF_HOLD_LAST_FRAME + AnimFlags.AF_UPPERBODY,
         options.anim.enter.playbackRate || 0.0,
         options.anim.enter.lock?.x || false,
         options.anim.enter.lock?.y || false,
@@ -125,9 +120,9 @@ async function animate(options: AnimationOptions) {
             options.anim.idle.blendOutSpeed || 0.0,
             options.anim.idle.duration || -1,
             options.anim.idle.flag ||
-              AnimationFlags.AF_LOOPING +
-                AnimationFlags.AF_UPPERBODY +
-                AnimationFlags.AF_SECONDARY,
+              AnimFlags.AF_LOOPING +
+                AnimFlags.AF_UPPERBODY +
+                AnimFlags.AF_SECONDARY,
             options.anim.idle.playbackRate || 0.0,
             options.anim.idle.lock?.x || false,
             options.anim.idle.lock?.y || false,
@@ -149,7 +144,7 @@ async function animate(options: AnimationOptions) {
         options.blendInSpeed || 8.0,
         options.blendOutSpeed || 1.0,
         options.duration || -1,
-        options?.flag || AnimationFlags.AF_LOOPING,
+        options?.flag || AnimFlags.AF_LOOPING,
         options.playbackRate || 0.0,
         options.lock?.x || false,
         options.lock?.y || false,
@@ -160,7 +155,7 @@ async function animate(options: AnimationOptions) {
       break;
   }
 
-  let handles: AnimationHandles = {
+  let handles: AnimHandles = {
     prop: 0,
     particle: 0,
   };
@@ -172,14 +167,14 @@ async function animate(options: AnimationOptions) {
   return handles;
 }
 
-export function startAnim(options: AnimationOptions) {
+export function startAnim(options: AnimOptions) {
   if (!DoesAnimDictExist(options.dictionary)) {
     throw new Error(`Animation dictionary ${options.dictionary} not found`);
   }
 
   RequestAnimDict(options.dictionary);
 
-  return new Promise<AnimationHandles>(function (resolve, reject) {
+  return new Promise<AnimHandles>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(() => {
       if (HasAnimDictLoaded(options.dictionary)) {

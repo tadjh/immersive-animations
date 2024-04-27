@@ -1,14 +1,14 @@
-import { AnimationOptions, AnimationFlags } from "../types";
+import { AnimOptions, AnimFlags } from "../types";
 
 export const CURRENT_RESOURCE_NAME = GetCurrentResourceName();
 export const COMMAND_EMOTE = "e";
 
 export const DEFAULT_ENTER_FLAGS =
-  AnimationFlags.AF_HOLD_LAST_FRAME + AnimationFlags.AF_UPPERBODY;
+  AnimFlags.AF_HOLD_LAST_FRAME + AnimFlags.AF_UPPERBODY;
 export const DEFAULT_EXIT_FLAGS =
-  AnimationFlags.AF_HOLD_LAST_FRAME +
-  AnimationFlags.AF_UPPERBODY +
-  AnimationFlags.AF_SECONDARY;
+  AnimFlags.AF_HOLD_LAST_FRAME +
+  AnimFlags.AF_UPPERBODY +
+  AnimFlags.AF_SECONDARY;
 
 // missfam4
 

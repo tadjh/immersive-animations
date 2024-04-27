@@ -1,6 +1,6 @@
-import { AnimationOptions, AnimationFlags, PedBoneId } from "../types";
+import { AnimOptions, AnimFlags, PedBoneId } from "../types";
 
-const defaultEmotes: { [key: string]: AnimationOptions } = {
+const defaultEmotes: { [key: string]: AnimOptions } = {
   bird: {
     dictionary: "anim@mp_player_intselfiethe_bird",
     anim: {
@@ -33,9 +33,7 @@ const defaultEmotes: { [key: string]: AnimationOptions } = {
     name: "base",
     type: "single",
     flag:
-      AnimationFlags.AF_LOOPING +
-      AnimationFlags.AF_UPPERBODY +
-      AnimationFlags.AF_SECONDARY,
+      AnimFlags.AF_LOOPING + AnimFlags.AF_UPPERBODY + AnimFlags.AF_SECONDARY,
     prop: {
       model: "prop_tool_broom",
       bone: PedBoneId.PH_R_Hand,
@@ -45,6 +43,6 @@ const defaultEmotes: { [key: string]: AnimationOptions } = {
   },
 };
 
-export const emotes = new Map<string, AnimationOptions>(
+export const emotes = new Map<string, AnimOptions>(
   Object.entries(defaultEmotes)
 );
