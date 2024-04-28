@@ -28,7 +28,10 @@ function cleanUp() {
   nextRot = { x: 0.0, y: 0.0, z: 0.0 };
 }
 
-export function editProp(propHandle: number) {
+export function editProp(propHandle: number, curPos: Vector3, curRot: Vector3) {
+  // nextPos = { ...curPos };
+  // nextRot = { ...curRot };
+
   const tick = setTick(() => {
     if (!isEditingProp) {
       cleanUp();
@@ -101,6 +104,7 @@ export function editProp(propHandle: number) {
         nextRot.y,
         nextRot.z
       );
+      isUpdated = false;
     }
   });
 }

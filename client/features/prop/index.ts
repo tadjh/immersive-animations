@@ -9,10 +9,11 @@ import {
 import { shouldThreadExpire } from "../../utils";
 import { debugPrint } from "../../utils/debug";
 import { attachPtfx, detachPtfx } from "../particle";
+import { editProp } from "./edit";
 
 let curPos: Vector3 = { x: 1.0, y: 1.0, z: 1.0 };
 let curRot: Vector3 = { x: 0.0, y: 0.0, z: 0.0 };
-export let isEditingProp = false;
+export let isEditingProp = true;
 
 async function spawnProp(options: PropOptions) {
   const propHandle = CreateObject(
@@ -60,7 +61,8 @@ async function spawnProp(options: PropOptions) {
   // TODO does this break "e c"
   SetModelAsNoLongerNeeded(options.model);
 
-  // TODO create env flag for edit mode: editProp();
+  // TODO create env flag for edit mode:
+  editProp(propHandle, curPos, curRot);
 
   let handles = {
     prop: propHandle,
