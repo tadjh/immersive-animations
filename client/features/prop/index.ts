@@ -13,7 +13,7 @@ import { editProp } from "./edit";
 
 let curPos: Vector3 = { x: 1.0, y: 1.0, z: 1.0 };
 let curRot: Vector3 = { x: 0.0, y: 0.0, z: 0.0 };
-export let isEditingProp = true;
+export let isEditingProp = false;
 
 async function spawnProp(options: PropOptions) {
   const propHandle = CreateObject(
