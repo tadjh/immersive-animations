@@ -65,9 +65,9 @@ function spawn(propHandle: number, options: PtfxOptions) {
     options.rotation.y,
     options.rotation.z,
     options.scale,
-    options.lock.x,
-    options.lock.y,
-    options.lock.z
+    options.invert.x,
+    options.invert.y,
+    options.invert.z
   );
   debugPrint(
     `Looped Particle spawning with handle ${particleHandle} with propHandle ${propHandle}`

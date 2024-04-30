@@ -53,9 +53,9 @@ export function stopAnim(handles: AnimHandles): AnimHandles {
               AnimFlags.AF_UPPERBODY +
               AnimFlags.AF_SECONDARY,
           exitAnim.playbackRate || 0.0,
-          exitAnim.lock?.x || false,
-          exitAnim.lock?.y || false,
-          exitAnim.lock?.z || false
+          exitAnim.invert?.x || false,
+          exitAnim.invert?.y || false,
+          exitAnim.invert?.z || false
         );
 
         if (handles.prop) detachProp(handles);
@@ -103,9 +103,9 @@ async function animate(options: AnimOptions) {
         options.anim.enter.flag ||
           AnimFlags.AF_HOLD_LAST_FRAME + AnimFlags.AF_UPPERBODY,
         options.anim.enter.playbackRate || 0.0,
-        options.anim.enter.lock?.x || false,
-        options.anim.enter.lock?.y || false,
-        options.anim.enter.lock?.z || false
+        options.anim.enter.invert?.x || false,
+        options.anim.enter.invert?.y || false,
+        options.anim.enter.invert?.z || false
       );
 
       const tick = setTick(() => {
@@ -124,9 +124,9 @@ async function animate(options: AnimOptions) {
                 AnimFlags.AF_UPPERBODY +
                 AnimFlags.AF_SECONDARY,
             options.anim.idle.playbackRate || 0.0,
-            options.anim.idle.lock?.x || false,
-            options.anim.idle.lock?.y || false,
-            options.anim.idle.lock?.z || false
+            options.anim.idle.invert?.x || false,
+            options.anim.idle.invert?.y || false,
+            options.anim.idle.invert?.z || false
           );
 
           return clearTick(tick);
@@ -146,9 +146,9 @@ async function animate(options: AnimOptions) {
         options.duration || -1,
         options?.flag || AnimFlags.AF_LOOPING,
         options.playbackRate || 0.0,
-        options.lock?.x || false,
-        options.lock?.y || false,
-        options.lock?.z || false
+        options.invert?.x || false,
+        options.invert?.y || false,
+        options.invert?.z || false
       );
       break;
     default:

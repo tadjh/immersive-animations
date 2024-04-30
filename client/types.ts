@@ -15,7 +15,7 @@ export interface PtfxOptions {
   offset: { x: number; y: number; z: number };
   rotation: { x: number; y: number; z: number };
   scale: number;
-  lock: { x: boolean; y: boolean; z: boolean };
+  invert: { x: boolean; y: boolean; z: boolean };
 }
 
 export interface PropOptions {
@@ -34,7 +34,7 @@ export interface AnimData {
   blendOutSpeed?: number;
   duration?: number;
   playbackRate?: number;
-  lock?: { x: boolean; y: boolean; z: boolean };
+  invert?: { x: boolean; y: boolean; z: boolean };
 }
 
 type AnimTypes =
