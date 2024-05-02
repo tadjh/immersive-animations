@@ -20,7 +20,7 @@ export function detachPtfx(handles: AnimHandles) {
   return { prop: handles.prop, particle: 0 };
 }
 
-function spawn(propHandle: number, options: PtfxOptions) {
+function spawnParticle(propHandle: number, options: PtfxOptions) {
   // const isNonLooped = false; // TODO support looped particles
 
   // if (isNonLooped) {
@@ -84,7 +84,7 @@ export function attachPtfx(propHandle: number, options: PtfxOptions) {
     const startTime = Date.now();
     const tick = setTick(() => {
       if (HasNamedPtfxAssetLoaded(options.asset)) {
-        resolve(spawn(propHandle, options));
+        resolve(spawnParticle(propHandle, options));
         return clearTick(tick);
       }
       const elapsedTime = Date.now() - startTime;
