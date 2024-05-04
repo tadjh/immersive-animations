@@ -1,7 +1,7 @@
+import { CURRENT_RESOURCE_NAME } from "../../config";
 import { AnimOptions, AnimFlags, AnimData, AnimHandles } from "../../types";
 import { shouldThreadExpire } from "../../utils";
-import { debugPrint } from "../../utils/debug";
-import { attachProp, detachProp } from "../prop";
+import { attachProps, detachProps } from "../prop";
 
 let lastDict = "";
 let lastAnim = "";
@@ -18,14 +18,18 @@ function cleanUp() {
   exitAnim = { name: "" };
 }
 
-export function stopAnim(handles: AnimHandles): AnimHandles {
+export function stopAnim(prevHandles: AnimHandles): AnimHandles {
   const ped = PlayerPedId();
+
+  let nextHandles = { ...prevHandles };
 
   switch (lastType) {
     case "single":
       StopAnimTask(PlayerPedId(), lastDict, lastAnim, 1.0);
 
-      if (handles.prop) detachProp(handles);
+      if (prevHandles.propHandle || prevHandles.propTwoHandle) {
+        nextHandles = detachProps(prevHandles);
+      }
 
       const startTime = Date.now();
       const tick = setTick(() => {
@@ -58,7 +62,9 @@ export function stopAnim(handles: AnimHandles): AnimHandles {
           exitAnim.invert?.z || false
         );
 
-        if (handles.prop) detachProp(handles);
+        if (prevHandles.propHandle || prevHandles.propTwoHandle) {
+          nextHandles = detachProps(prevHandles);
+        }
 
         const tick = setTick(() => {
           if (GetEntityAnimCurrentTime(ped, lastDict, exitAnim.name) === 1) {
@@ -69,18 +75,19 @@ export function stopAnim(handles: AnimHandles): AnimHandles {
       }
       break;
     default:
-      if (handles.prop) detachProp(handles);
+      if (prevHandles.propHandle || prevHandles.propTwoHandle) {
+        nextHandles = detachProps(prevHandles);
+      }
       ClearPedTasksImmediately(ped);
       break;
   }
 
-  return {
-    prop: 0,
-    particle: 0,
-  };
+  emit(`${CURRENT_RESOURCE_NAME}:animCancelled`);
+
+  return nextHandles;
 }
 
-async function animate(options: AnimOptions) {
+async function animate(options: AnimOptions, prevHandles: AnimHandles) {
   const ped = PlayerPedId();
 
   // Reset animation blending before starting a new animation.
@@ -155,19 +162,14 @@ async function animate(options: AnimOptions) {
       break;
   }
 
-  let handles: AnimHandles = {
-    prop: 0,
-    particle: 0,
-  };
-
-  if (options.prop) {
-    handles = await attachProp(options.prop);
-  }
-
-  return handles;
+  const nextHandles = await attachProps(
+    { prop: options.prop, propTwo: options.propTwo },
+    prevHandles
+  );
+  return nextHandles;
 }
 
-export function startAnim(options: AnimOptions) {
+export function startAnim(options: AnimOptions, prevHandles: AnimHandles) {
   if (!DoesAnimDictExist(options.dictionary)) {
     throw new Error(`Animation dictionary ${options.dictionary} not found`);
   }
@@ -178,7 +180,7 @@ export function startAnim(options: AnimOptions) {
     const startTime = Date.now();
     const tick = setTick(() => {
       if (HasAnimDictLoaded(options.dictionary)) {
-        resolve(animate(options));
+        resolve(animate(options, prevHandles));
         return clearTick(tick);
       }
       const elapsedTime = Date.now() - startTime;

@@ -5,13 +5,28 @@ import { preview } from "./features/animate/preview";
 import { getArg, isEmpty } from "./utils";
 import { debugPrint } from "./utils/debug";
 import { startAnim, stopAnim } from "./features/animate";
-import { AnimHandles, AnimOptions, PtfxOptions, PropOptions } from "./types";
-import { attachProp, detachProp } from "./features/prop";
+import {
+  AnimHandles,
+  AnimOptions,
+  PtfxOptions,
+  ParticleHandles,
+  PropHandles,
+} from "./types";
+import { attachProps, detachProps } from "./features/prop";
 
-let handles: AnimHandles = { prop: 0, particle: 0 };
+let handles: AnimHandles = {
+  propHandle: 0,
+  propModel: 0,
+  particleHandle: 0,
+  particleName: "",
+  propTwoHandle: 0,
+  propTwoModel: 0,
+  particleTwoHandle: 0,
+  particleTwoName: "",
+};
 
-export function setHandles(nextHandles: AnimHandles) {
-  handles = { ...nextHandles };
+export function setHandles(nextHandles: Partial<AnimHandles>) {
+  handles = { ...handles, ...nextHandles };
 }
 
 /**
@@ -26,7 +41,8 @@ export async function emote(_source: number, args: string[] | []) {
   const arg = getArg(args);
 
   if (arg === "c") {
-    return (handles = stopAnim(handles));
+    const nextHandles = stopAnim(handles);
+    return setHandles(nextHandles);
   }
 
   if (arg === "p") {
@@ -35,7 +51,8 @@ export async function emote(_source: number, args: string[] | []) {
 
   try {
     if (emotes.has(arg)) {
-      handles = await startAnim(emotes.get(arg)!);
+      const nextHandles = await startAnim(emotes.get(arg)!, handles);
+      setHandles(nextHandles);
     }
   } catch (error) {
     debugPrint(error);
@@ -44,40 +61,99 @@ export async function emote(_source: number, args: string[] | []) {
 
 RegisterCommand(COMMAND_EMOTE, emote, false);
 
-globalThis.exports("startAnim", async (options: AnimOptions) => {
-  const nextHandles = await startAnim(options);
-  setHandles(nextHandles);
-});
+globalThis.exports(
+  "startAnim",
+  async (options: AnimOptions): Promise<AnimHandles> => {
+    const nextHandles = await startAnim(options, handles);
+    setHandles(nextHandles);
+    return nextHandles;
+  }
+);
 
-globalThis.exports("stopAnim", () => {
+globalThis.exports("stopAnim", (): AnimHandles => {
   const nextHandles = stopAnim(handles);
   setHandles(nextHandles);
+  return nextHandles;
 });
 
-globalThis.exports("attachProp", async (options: PropOptions) => {
-  const nextHandles = await attachProp(options);
-  setHandles(nextHandles);
-});
+globalThis.exports(
+  "attachProps",
+  async (
+    options: Pick<AnimOptions, "prop" | "propTwo">,
+    prevHandles: AnimHandles
+  ): Promise<PropHandles> => {
+    const nextHandles = await attachProps(options, prevHandles);
+    setHandles(nextHandles);
+    return nextHandles;
+  }
+);
 
-globalThis.exports("detachProp", () => {
-  const nextHandles = detachProp(handles);
+globalThis.exports("detachProps", (): AnimHandles => {
+  const nextHandles = detachProps(handles);
   setHandles(nextHandles);
+  return nextHandles;
 });
 
 globalThis.exports(
   "attachPtfx",
-  async (propHandle: number, options: PtfxOptions) => {
-    const nextHandles = await attachPtfx(propHandle, options);
-    setHandles(nextHandles);
+  async (
+    propHandle: number,
+    options: PtfxOptions
+  ): Promise<ParticleHandles | false> => {
+    let nextHandles: ParticleHandles = {
+      particleHandle: 0,
+      particleName: "",
+    };
+
+    if (propHandle === handles.propHandle) {
+      nextHandles = await attachPtfx(propHandle, options);
+      setHandles(nextHandles);
+      return nextHandles;
+    }
+
+    if (propHandle === handles.propTwoHandle) {
+      nextHandles = await attachPtfx(propHandle, options);
+      setHandles({
+        particleTwoHandle: nextHandles.particleHandle,
+        particleTwoName: nextHandles.particleName,
+      });
+      return nextHandles;
+    }
+
+    debugPrint(`Argument propHandle with id ${propHandle} not recognized.`);
+    return false;
   }
 );
 
-globalThis.exports("detachPtfx", () => {
-  const nextHandles = detachPtfx(handles);
-  setHandles(nextHandles);
-});
+globalThis.exports(
+  "detachPtfx",
+  (prevHandles: Omit<PropHandles, "propModel">): ParticleHandles | false => {
+    let nextHandles: ParticleHandles = {
+      ...prevHandles,
+    };
+    if (prevHandles.propHandle === handles.propHandle) {
+      nextHandles = detachPtfx(prevHandles);
+      setHandles(nextHandles);
+      return nextHandles;
+    }
 
-globalThis.exports("getHandles", () => handles);
+    if (prevHandles.propHandle === handles.propTwoHandle) {
+      nextHandles = detachPtfx(prevHandles);
+      setHandles({
+        particleTwoHandle: nextHandles.particleHandle,
+        particleTwoName: nextHandles.particleName,
+      });
+      return nextHandles;
+    }
+
+    debugPrint(
+      `Argument propHandle with id ${prevHandles.propHandle} not recognized.`
+    );
+    return false;
+  }
+);
+
+globalThis.exports("getHandles", (): AnimHandles => handles);
 
 globalThis.exports("setHandles", setHandles);
 

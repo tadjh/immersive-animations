@@ -79,13 +79,24 @@ export function preview() {
 
   console.log(i, anims[i]);
 
-  startAnim({ dictionary, name: anims[i], type: "single" });
+  const defaultHandles = {
+    propHandle: 0,
+    propModel: 0,
+    particleHandle: 0,
+    particleName: "",
+    propTwoHandle: 0,
+    propTwoModel: 0,
+    particleTwoHandle: 0,
+    particleTwoName: "",
+  };
+
+  startAnim({ dictionary, name: anims[i], type: "single" }, defaultHandles);
 
   loop = setInterval(() => {
     if (i === anims.length - 1) clearInterval(loop);
     i++;
     console.log(i, anims[i]);
-    startAnim({ dictionary, name: anims[i], type: "single" });
+    startAnim({ dictionary, name: anims[i], type: "single" }, defaultHandles);
   }, 3000);
 
   //   SetPedAnim(animDict, "ped_a_enter_loop", { animType: "single" });
