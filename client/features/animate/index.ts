@@ -82,7 +82,7 @@ export function stopAnim(prevHandles: AnimHandles): AnimHandles {
       break;
   }
 
-  emit(`${CURRENT_RESOURCE_NAME}:animCancelled`);
+  emit(`${CURRENT_RESOURCE_NAME}:animStopped`, prevHandles.animName);
 
   return nextHandles;
 }
@@ -117,7 +117,10 @@ async function animate(options: AnimOptions, prevHandles: AnimHandles) {
         options.anim.enter.invert?.z || false
       );
 
-      nextHandles = { ...nextHandles, animName: options.anim.enter.name };
+      nextHandles = {
+        ...nextHandles,
+        animName: `${options.dictionary}@${options.anim.enter.name}`,
+      };
 
       const tick = setTick(() => {
         if (GetEntityAnimCurrentTime(ped, options.dictionary, lastAnim) === 1) {
@@ -162,7 +165,10 @@ async function animate(options: AnimOptions, prevHandles: AnimHandles) {
         options.invert?.z || false
       );
 
-      nextHandles = { ...nextHandles, animName: options.name };
+      nextHandles = {
+        ...nextHandles,
+        animName: `${options.dictionary}@${options.name}`,
+      };
 
       break;
     default:
@@ -173,6 +179,9 @@ async function animate(options: AnimOptions, prevHandles: AnimHandles) {
     { prop: options.prop, propTwo: options.propTwo },
     prevHandles
   );
+
+  emit(`${CURRENT_RESOURCE_NAME}:animStarted`, nextHandles.animName);
+
   return { ...nextHandles, ...resHandles };
 }
 
