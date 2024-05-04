@@ -15,6 +15,7 @@ import {
 import { attachProps, detachProps } from "./features/prop";
 
 let handles: AnimHandles = {
+  animName: "",
   propHandle: 0,
   propModel: 0,
   particleHandle: 0,

@@ -21,7 +21,7 @@ function cleanUp() {
 export function stopAnim(prevHandles: AnimHandles): AnimHandles {
   const ped = PlayerPedId();
 
-  let nextHandles = { ...prevHandles };
+  let nextHandles = { ...prevHandles, animName: "" };
 
   switch (lastType) {
     case "single":
@@ -90,6 +90,8 @@ export function stopAnim(prevHandles: AnimHandles): AnimHandles {
 async function animate(options: AnimOptions, prevHandles: AnimHandles) {
   const ped = PlayerPedId();
 
+  let nextHandles = { ...prevHandles };
+
   // Reset animation blending before starting a new animation.
   ClearPedTasks(ped);
 
@@ -114,6 +116,8 @@ async function animate(options: AnimOptions, prevHandles: AnimHandles) {
         options.anim.enter.invert?.y || false,
         options.anim.enter.invert?.z || false
       );
+
+      nextHandles = { ...nextHandles, animName: options.anim.enter.name };
 
       const tick = setTick(() => {
         if (GetEntityAnimCurrentTime(ped, options.dictionary, lastAnim) === 1) {
@@ -157,16 +161,19 @@ async function animate(options: AnimOptions, prevHandles: AnimHandles) {
         options.invert?.y || false,
         options.invert?.z || false
       );
+
+      nextHandles = { ...nextHandles, animName: options.name };
+
       break;
     default:
       break;
   }
 
-  const nextHandles = await attachProps(
+  const resHandles = await attachProps(
     { prop: options.prop, propTwo: options.propTwo },
     prevHandles
   );
-  return nextHandles;
+  return { ...nextHandles, ...resHandles };
 }
 
 export function startAnim(options: AnimOptions, prevHandles: AnimHandles) {
