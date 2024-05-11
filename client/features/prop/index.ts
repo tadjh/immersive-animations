@@ -1,7 +1,7 @@
 import {
-  Model,
+  // Model,
   PropOptions,
-  PedBoneId,
+  // PedBoneId,
   RotationOrders,
   Vector3,
   AnimHandles,
@@ -99,8 +99,9 @@ async function spawnProp(
   }
 
   if (options.particle && !nextHandles.particleName) {
-    const particleHandles = await attachPtfx(nextPropHandle, options.particle);
-    nextHandles = { ...nextHandles, ...particleHandles };
+    attachPtfx(nextPropHandle, options.particle);
+    // const particleHandles = await
+    // nextHandles = { ...nextHandles, ...particleHandles };
   }
 
   return nextHandles;
@@ -131,6 +132,7 @@ function attachProp(
   });
 }
 
+// TODO This is gross all to handle secondary props... Switch to arrays of props and this becomes way simpler
 export async function attachProps(
   options: Pick<AnimOptions, "prop" | "propTwo">,
   prevHandles: AnimHandles
@@ -190,16 +192,40 @@ export async function attachProps(
   return nextHandles;
 }
 
-export function detachProp(prevHandles: PropHandles): PropHandles {
+function waitForDeletedNetworkedPtfx(particleHandle: number) {
+  return new Promise<boolean>(function (resolve, reject) {
+    const startTime = Date.now();
+    const tick = setTick(() => {
+      if (!DoesParticleFxLoopedExist(particleHandle)) {
+        resolve(true);
+        return clearTick(tick);
+      }
+      const elapsedTime = Date.now() - startTime;
+      if (shouldThreadExpire(elapsedTime)) {
+        debugPrint("Max execution time elapsed in waitForNetworkedPtfx");
+        reject(false);
+        return clearTick(tick);
+      }
+    });
+  });
+}
+
+export async function detachProp(
+  prevHandles: PropHandles
+): Promise<PropHandles> {
   let nextHandles = { ...prevHandles };
 
   if (DoesEntityExist(prevHandles.propHandle)) {
     debugPrint(`Deleting prop with id ${prevHandles.propHandle}`);
 
-    if (prevHandles.particleHandle) {
-      const resHandles = detachPtfx(prevHandles);
-      nextHandles = { ...nextHandles, ...resHandles };
+    if (
+      prevHandles.particleHandle ||
+      DoesParticleFxLoopedExist(prevHandles.particleHandle)
+    ) {
+      detachPtfx(prevHandles);
     }
+
+    await waitForDeletedNetworkedPtfx(prevHandles.particleHandle);
 
     DetachEntity(prevHandles.propHandle, false, false);
     DeleteEntity(prevHandles.propHandle);
@@ -211,11 +237,11 @@ export function detachProp(prevHandles: PropHandles): PropHandles {
   return nextHandles;
 }
 
-export function detachProps(handles: AnimHandles): AnimHandles {
+export async function detachProps(handles: AnimHandles): Promise<AnimHandles> {
   let nextHandles = { ...handles };
 
   if (handles.propHandle) {
-    const resHandles = detachProp({
+    const resHandles = await detachProp({
       propHandle: handles.propHandle,
       propModel: handles.propModel,
       particleHandle: handles.particleHandle,
@@ -224,7 +250,7 @@ export function detachProps(handles: AnimHandles): AnimHandles {
     nextHandles = { ...nextHandles, ...resHandles };
   }
   if (handles.propTwoHandle) {
-    const resHandles = detachProp({
+    const resHandles = await detachProp({
       propHandle: handles.propTwoHandle,
       propModel: handles.propTwoModel,
       particleHandle: handles.particleTwoHandle,

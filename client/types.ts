@@ -56,24 +56,11 @@ export interface AnimData {
   invert?: { x: boolean; y: boolean; z: boolean };
 }
 
-type AnimTypes =
-  | {
-      type: "inAndOut";
-      anim: {
-        enter: AnimData;
-        idle: AnimData;
-        exit: AnimData;
-      };
-    }
-  | ({
-      type: "single";
-    } & AnimData);
-
 export type AnimOptions = {
   dictionary: string;
   prop?: PropOptions;
   propTwo?: PropOptions;
-} & AnimTypes;
+} & AnimData;
 
 export enum RotationOrders {
   ZYX,

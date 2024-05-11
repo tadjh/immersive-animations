@@ -10,5 +10,5 @@ export function getArg(args: Args) {
 }
 
 export function shouldThreadExpire(elapsedTime: number) {
-  return elapsedTime > 5000;
+  return elapsedTime > 10000;
 }

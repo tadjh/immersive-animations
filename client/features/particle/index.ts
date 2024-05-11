@@ -1,8 +1,9 @@
+import { CURRENT_RESOURCE_NAME } from "../../config";
 import { ParticleHandles, PropHandles, PtfxOptions } from "../../types";
 import { shouldThreadExpire } from "../../utils";
 import { debugPrint } from "../../utils/debug";
 
-export function detachPtfx(
+export function networkedDetachPtfx(
   prevHandles: Omit<PropHandles, "propModel">
 ): ParticleHandles {
   debugPrint(
@@ -21,52 +22,24 @@ export function detachPtfx(
     nextHandles.particleName = "";
   }
 
-  // if (handles.prop === 0 || handles.prop === 1) {
-  // TODO handle Non-looped
-  // }
-
   return nextHandles;
+}
+
+export function detachPtfx(prevHandles: Omit<PropHandles, "propModel">) {
+  const propNetId = NetworkGetNetworkIdFromEntity(prevHandles.propHandle);
+
+  emitNet(`${CURRENT_RESOURCE_NAME}:dispatchRemoveParticle`, {
+    ...prevHandles,
+    propHandle: propNetId,
+  });
 }
 
 function spawnParticle(
   propHandle: number,
   options: PtfxOptions
 ): ParticleHandles {
-  // const isNonLooped = false; // TODO support looped particles
-
-  // if (isNonLooped) {
-  //   let i = 0;
-  //   const tick = setTick(() => {
-  //     UseParticleFxAsset(asset);
-  //     const particleHandle = StartParticleFxNonLoopedOnEntity(
-  //       particle,
-  //       propHandle,
-  //       offset.x,
-  //       offset.y,
-  //       offset.z,
-  //       rotation.x,
-  //       rotation.y,
-  //       rotation.z,
-  //       scale,
-  //       lock.x,
-  //       lock.y,
-  //       lock.z
-  //     );
-
-  //     if (i === 0) {
-  //       console.log(
-  //         `Non-looped Particle spawning with handle ${particleHandle} with propHandle ${propHandle}`
-  //       );
-  //       particleMap.set(propHandle, Number(particleHandle));
-  //       i++;
-  //     } else if (!particleMap.has(propHandle)) {
-  //       return clearTick(tick);
-  //     }
-  //   });
-  // }
-
   UseParticleFxAsset(options.asset);
-  const particleHandle = StartParticleFxLoopedOnEntity(
+  const particleHandle = StartNetworkedParticleFxLoopedOnEntity(
     options.name,
     propHandle,
     options.offset.x,
@@ -86,7 +59,7 @@ function spawnParticle(
   return { particleHandle, particleName: options.name };
 }
 
-export function attachPtfx(propHandle: number, options: PtfxOptions) {
+export function networkedAttachPtfx(propHandle: number, options: PtfxOptions) {
   debugPrint(`Spawning particle onto prop with id ${propHandle}`);
 
   RequestNamedPtfxAsset(options.asset);
@@ -105,4 +78,9 @@ export function attachPtfx(propHandle: number, options: PtfxOptions) {
       }
     });
   });
+}
+
+export function attachPtfx(propHandle: number, options: PtfxOptions) {
+  const propNetId = NetworkGetNetworkIdFromEntity(propHandle);
+  emitNet(`${CURRENT_RESOURCE_NAME}:dispatchAddParticle`, propNetId, options);
 }
