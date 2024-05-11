@@ -91,13 +91,13 @@ export function preview() {
     particleTwoName: "",
   };
 
-  startAnim({ dictionary, name: anims[i], type: "single" }, mockHandles);
+  startAnim({ dictionary, name: anims[i] }, mockHandles);
 
   loop = setInterval(() => {
     if (i === anims.length - 1) clearInterval(loop);
     i++;
     console.log(i, anims[i]);
-    startAnim({ dictionary, name: anims[i], type: "single" }, mockHandles);
+    startAnim({ dictionary, name: anims[i] }, mockHandles);
   }, 3000);
 
   //   SetPedAnim(animDict, "ped_a_enter_loop", { animType: "single" });

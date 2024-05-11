@@ -155,8 +155,6 @@ function waitForNetId(propNetId: number) {
   return new Promise<boolean>(function (resolve, reject) {
     const startTime = Date.now();
     const tick = setTick(() => {
-      console.log(NetworkDoesEntityExistWithNetworkId(propNetId));
-
       if (NetworkDoesEntityExistWithNetworkId(propNetId)) {
         resolve(true);
         return clearTick(tick);
@@ -174,10 +172,7 @@ function waitForNetId(propNetId: number) {
 onNet(
   `${CURRENT_RESOURCE_NAME}:broadcastAddParticle`,
   async (propNetId: number, options: PtfxOptions, source: number) => {
-    console.log(NetworkDoesEntityExistWithNetworkId(propNetId));
-
     const result = await waitForNetId(propNetId);
-
     if (result) {
       const propHandle = NetToObj(propNetId);
 
@@ -198,13 +193,6 @@ onNet(
         }
         debugPrint(`Argument propHandle with id ${propHandle} not recognized.`);
       } else {
-        console.log(
-          "networkedHandles",
-          propHandle,
-          nextHandles.particleHandle,
-          nextHandles.particleName
-        );
-
         networkedHandles.set(propHandle, nextHandles.particleHandle);
       }
     } else {
